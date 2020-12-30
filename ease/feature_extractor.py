@@ -18,7 +18,7 @@ import util_functions
 log = logging.getLogger(__name__)
 
 # Ian Tan, 2020/11/17: edited
-base_path = "D:/AES-Monash/maes/ease/"
+base_path = "D:/mas/Maes/MAES-Influence-test/ease/"
 
 # Ian Tan, 2020/11/17: created and downloaded data folder
 #Paths to needed data files
@@ -138,7 +138,6 @@ class FeatureExtractor(object):
         Returns an array of length features
         e_set - EssaySet object
         """
-        
         text = e_set._text
         lengths = [len(e) for e in text]
         word_counts = [max(len(t),1) for t in e_set._tokens]
@@ -147,31 +146,13 @@ class FeatureExtractor(object):
         punc_count = [e.count(".") + e.count("?") + e.count("!") for e in text]
         chars_per_word = [lengths[m] / float(word_counts[m]) for m in range(0, len(text))]
 
-        
-        # Ian Tan, 2020/11/17: add some shallow features and change the definition of punctuation
-        punc_count = [e.count(";") + e.count(":") + e.count("!") for e in text]        
-        sentence_count = [e.count(".") for e in text]
-        question_count = [e.count("?") for e in text]
-        # Ian Tan, 2020/11/17: protect against division by zero, just return word_counts if so
-        
-        words_per_sentence = [i/j if j!=0 else i for i, j in zip(word_counts, sentence_count)]
-        #words_per_sentence = [i / j for i, j in zip(word_counts, sentence_count)]
-        #words_per_sentence = list(map(truediv, word_counts, punc_count)) # as approximation
-        
-        # can't get paragraph count as the input has been processed
-        # para_counts = [e.count("\r") for e in text]
-        
         good_pos_tags,bad_pos_positions= self._get_grammar_errors(e_set._pos,e_set._text,e_set._tokens)
         good_pos_tag_prop = [good_pos_tags[m] / float(word_counts[m]) for m in range(0, len(text))]
 
-        # print("length: {}, word_counts: {}, comma_count: {}, ap_count: {}, punc_count: {}, chars_per_word: {}, good_pos_tags: {}, good_pos_tag_prop: {}".format(lengths, word_counts, comma_count, ap_count, punc_count, chars_per_word, good_pos_tags, good_pos_tag_prop))
-        
         length_arr = numpy.array((
-            lengths, word_counts, comma_count, ap_count, punc_count, chars_per_word,
-            # Ian Tan, 2020/11/17: added the 3 new shallow features to return
-            sentence_count, question_count, words_per_sentence,
-            good_pos_tags, good_pos_tag_prop)).transpose()
-        
+        lengths, word_counts, comma_count, ap_count, punc_count, chars_per_word, good_pos_tags,
+        good_pos_tag_prop)).transpose()
+
         return length_arr.copy()
 
     def gen_bag_feats(self, e_set):
